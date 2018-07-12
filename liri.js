@@ -1,25 +1,22 @@
 require("dotenv").config();
 var keys = require("./keys")
-var request = require("request");
+// var request = require("request");
 var twitter = require("twitter");
 var Spotify = require("node-spotify-api");
-
-
+var omdbApi = require('omdb-client');
 
 var spotify = new Spotify(keys.spotify);
 var client = new twitter(keys.twitter);
+var omdbKey = keys.omdb.key;
 
-
+//process.argv
 var liriRequest = process.argv[2];
 var titleBash = process.argv;
 
 var titleFull = "";
-
-// Capture all the words in the address (again ignoring the first two Node arguments)
 for (var i = 3; i < titleBash.length; i++) {
     titleFull = titleFull + " " + titleBash[i];
 }
-
 
 switch(liriRequest){
     case "my-tweets":
@@ -27,6 +24,9 @@ switch(liriRequest){
     break;
     case "spotify-this-song":
     spotifySong();
+    break;
+    case "movie-this":
+    movie();
     break;
 }
 
@@ -48,20 +48,24 @@ client.get(twitterURLQuery, params, function(error, tweets){
 
 function spotifySong() {
 
-spotify.search({ type: 'track', query: titleFull }, function(err,response) {
+spotify.search({ type: 'track', query: titleFull, limit: 5 }, function(err,response) {
     if (err) {
         console.log(err);
         return;
-    } else {
+    } 
+    //TODO ACE OF BASS
+    // if(response.statusCode === 204) {
+
+    //     console.log("DEAD")
+    // }
+    else {
 
         console.log(`\n Here are the first five Spotify results for:${titleFull.toUpperCase()}`)
         console.log(`--------------------------------------------------`)
 
-    // var trackData = response.tracks.items
-    // for (let i = 0; i < trackData.length; i++) {
-    // set to give first five instead of all returns ^
+    var trackData = response.tracks.items
+    for (let i = 0; i < trackData.length; i++) {
 
-    for (let i = 0; i < 5 ; i++) {
         var trackList = response.tracks.items[i];
         console.log(`
         Artist: ${trackList.artists[0].name}
@@ -74,4 +78,57 @@ spotify.search({ type: 'track', query: titleFull }, function(err,response) {
 });
 }
 
+function movie() {
+    // * Title of the movie.
+    // * Year the movie came out.
+    // * IMDB Rating of the movie.
+    // * Rotten Tomatoes Rating of the movie.
+    // * Country where the movie was produced.
+    // * Language of the movie.
+    // * Plot of the movie.
+    // * Actors in the movie.
+
+//  var movieQuery = `https://www.omdbapi.com/?t=${titleFull}&y=&plot=short&apikey=${omdbKey}`.split(" ").join("+");
+
+//  console.log(movieQuery.response)
+
+var params = {
+    apiKey: omdbKey,
+    title: titleFull.split(" ").join("+"),
+    // plot: short,
+    incTomatoes: true
+}
+omdbApi.get(params, function(err, data) {
+    if (err){
+        console.log(err);
+    } else {
+        console.log(`
+        -------------------------------------------------------
+        ${data.Title}
+        -------------------------------------------------------
+        Year: ${data.Year}
+        IMDB Rating: ${data.Ratings[0].Value}
+        Rotten Tomato Score: ${data.Ratings[1].Value}
+        Country: ${data.Country}
+        Language(s): ${data.Language}
+        -------------------------------------------------------
+        Short Plot: ${data.Plot}
+        Starring: ${data.Actors}
+        `)
+    }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+};
 
