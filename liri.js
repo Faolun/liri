@@ -1,6 +1,7 @@
 require("dotenv").config();
 var keys = require("./keys")
-// var request = require("request");
+var fs = require("fs");
+var request = require("request");
 var twitter = require("twitter");
 var Spotify = require("node-spotify-api");
 var omdbApi = require('omdb-client');
@@ -15,7 +16,7 @@ var titleBash = process.argv;
 
 var titleFull = "";
 for (var i = 3; i < titleBash.length; i++) {
-    titleFull = titleFull + " " + titleBash[i];
+    titleFull = titleFull.trim() + " " + titleBash[i];
 }
 
 switch(liriRequest){
@@ -27,6 +28,9 @@ switch(liriRequest){
     break;
     case "movie-this":
     movie();
+    break;
+    case "do-what-it-says":
+    doIt();
     break;
 }
 
@@ -60,7 +64,7 @@ spotify.search({ type: 'track', query: titleFull, limit: 5 }, function(err,respo
     // }
     else {
 
-        console.log(`\n Here are the first five Spotify results for:${titleFull.toUpperCase()}`)
+        console.log(`\n Here are the first five Spotify results for: "${titleFull.toUpperCase()}"`)
         console.log(`--------------------------------------------------`)
 
     var trackData = response.tracks.items
@@ -78,19 +82,14 @@ spotify.search({ type: 'track', query: titleFull, limit: 5 }, function(err,respo
 });
 }
 
+
 function movie() {
-    // * Title of the movie.
-    // * Year the movie came out.
-    // * IMDB Rating of the movie.
-    // * Rotten Tomatoes Rating of the movie.
-    // * Country where the movie was produced.
-    // * Language of the movie.
-    // * Plot of the movie.
-    // * Actors in the movie.
 
-//  var movieQuery = `https://www.omdbapi.com/?t=${titleFull}&y=&plot=short&apikey=${omdbKey}`.split(" ").join("+");
-
-//  console.log(movieQuery.response)
+if (titleFull === "") {
+    titleFull = "Mr. Nobody";
+    movie();
+}else {
+console.log(titleFull)
 
 var params = {
     apiKey: omdbKey,
@@ -114,21 +113,29 @@ omdbApi.get(params, function(err, data) {
         -------------------------------------------------------
         Short Plot: ${data.Plot}
         Starring: ${data.Actors}
-        `)
-    }
+        `);
+    };
+    
 });
-
-
-
-
-
-
-
-
-
-
-
-
-
 };
+};
+
+// function doIt() {
+//     fs.readFile("random.txt", "utf8", function(error, data) {
+
+//         if (error) {
+//           return console.log(error);
+//         }
+
+//         titleFull = data.split(",").join();
+
+      
+//       });
+// }
+
+
+
+
+
+
 
