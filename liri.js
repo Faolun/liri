@@ -2,136 +2,156 @@ require("dotenv").config();
 var keys = require("./keys")
 var fs = require("fs");
 var request = require("request");
-var twitter = require("twitter");
+var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
 var omdbApi = require('omdb-client');
 
 var spotify = new Spotify(keys.spotify);
-var client = new twitter(keys.twitter);
+var client = new Twitter(keys.twitter);
 var omdbKey = keys.omdb.key;
+
+var spacer = `-------------------------------------------------------`
 
 //process.argv
 var liriRequest = process.argv[2];
-var titleBash = process.argv;
+var titleFull = process.argv.slice(3).join(" ");
 
-var titleFull = "";
-for (var i = 3; i < titleBash.length; i++) {
-    titleFull = titleFull.trim() + " " + titleBash[i];
-}
-
-switch(liriRequest){
+switch (liriRequest) {
     case "my-tweets":
-    mytweets();
-    break;
+        mytweets();
+        break;
     case "spotify-this-song":
-    spotifySong();
-    break;
+        spotifySong();
+        break;
     case "movie-this":
-    movie();
-    break;
+        movie();
+        break;
     case "do-what-it-says":
-    doIt();
-    break;
+        doIt();
+        break;
 }
 
 function mytweets() {
 
-//var twitterURLQuery = "https://api.twitter.com/1.1/statuses/home_timeline.json"
-var twitterURLQuery = "statuses/home_timeline"
+    var twitterURLQuery = "statuses/user_timeline"
 
-var params = {count: 20}
+    var params = { user_id: "1016817745827123205", count: 20 }
 
-client.get(twitterURLQuery, params, function(error, tweets){
-    if(!error){
-        for (let i = 0; i < tweets.length; i++) {
-            console.log(`You tweeted "${tweets[i].text}" on ${tweets[i].created_at}\n`);           
-        }
-    }
-});
+    client.get(twitterURLQuery, params, function (err, tweets) {
+
+        if (!err) {
+            for (let i = 0; i < tweets.length; i++) {
+                console.log(`You tweeted "${tweets[i].text}" on ${tweets[i].created_at}\n`);
+            }
+        };
+        if (err) {
+            console.log(err);
+        };
+    });
 };
 
 function spotifySong() {
 
-spotify.search({ type: 'track', query: titleFull, limit: 5 }, function(err,response) {
-    if (err) {
-        console.log(err);
-        return;
-    } 
-    //TODO ACE OF BASS
-    // if(response.statusCode === 204) {
 
-    //     console.log("DEAD")
-    // }
-    else {
+    if (titleFull) {
+        spotify.search({ type: 'track', query: titleFull, limit: 5 }, function (err, response) {
 
-        console.log(`\n Here are the first five Spotify results for: "${titleFull.toUpperCase()}"`)
-        console.log(`--------------------------------------------------`)
+            if (!err) {
+                console.log(`\nHere are the first five Spotify results for "${titleFull.toUpperCase()}"...`, )
+                var trackData = response.tracks.items
+                for (let i = 0; i < trackData.length; i++) {
+                    var trackList = response.tracks.items[i];
+                    var songData = [
+                        spacer,
+                        `Artist: ${trackList.artists[0].name}`,
+                        `Song Name: ${trackList.name}`,
+                        `Spotify Link: ${trackList.external_urls.spotify}`,
+                        `Album: ${trackList.album.name}`
+                    ].join("\n");
 
-    var trackData = response.tracks.items
-    for (let i = 0; i < trackData.length; i++) {
+                    console.log(songData);
+                }
+            }
+            else if (err) {
+                console.log(err);
+                return;
+            }
 
-        var trackList = response.tracks.items[i];
-        console.log(`
-        Artist: ${trackList.artists[0].name}
-        Song Name: ${trackList.name}
-        Spotify Link: ${trackList.external_urls.spotify}
-        Album: ${trackList.album.name}
-        `);
-    };
-    };
-});
-}
-
+        })
+    }
+    if (!titleFull) {
+        titleFull = "the sign ace of base"
+        spotifySong();
+    }
+};
 
 function movie() {
 
-if (titleFull === "") {
-    titleFull = "Mr. Nobody";
-    movie();
-}else {
-console.log(titleFull)
+    if (titleFull) {
+        var movieURL = `https://www.omdbapi.com/?t=${titleFull}&y=&plot=short&apikey=${omdbKey}`
 
-var params = {
-    apiKey: omdbKey,
-    title: titleFull.split(" ").join("+"),
-    // plot: short,
-    incTomatoes: true
+        request(movieURL, function (error, response, body) {
+            if(!error) {
+                var data = JSON.parse(body)
+                var movieData = [
+                spacer,
+                data.Title,
+                spacer,
+                `Year: ${data.Year}`,
+                `IMDB Rating: ${data.Ratings[0].Value}`,
+                `Rotten Tomato Score: ${data.Ratings[1].Value}`,
+                `Country: ${data.Country}`,
+                `Language(s): ${data.Language}`,
+                spacer,
+                `Short Plot: ${data.Plot}`,
+                `Starring: ${data.Actors}`
+            ].join("\n")
+
+            console.log(movieData);
+        } else if(error) {
+        console.log(error);
+        console.log(response);
+        }
+        })
+    }
+    if (!titleFull) {
+        console.log("No movie title entered, defaulting to Mr. Nobody... apparently, it is on Netflix.")
+        titleFull = "Mr. Nobody";
+        movie();
+    }
 }
-omdbApi.get(params, function(err, data) {
-    if (err){
-        console.log(err);
-    } else {
-        console.log(`
-        -------------------------------------------------------
-        ${data.Title}
-        -------------------------------------------------------
-        Year: ${data.Year}
-        IMDB Rating: ${data.Ratings[0].Value}
-        Rotten Tomato Score: ${data.Ratings[1].Value}
-        Country: ${data.Country}
-        Language(s): ${data.Language}
-        -------------------------------------------------------
-        Short Plot: ${data.Plot}
-        Starring: ${data.Actors}
-        `);
-    };
-    
-});
-};
-};
 
-// function doIt() {
-//     fs.readFile("random.txt", "utf8", function(error, data) {
 
-//         if (error) {
-//           return console.log(error);
-//         }
+function doIt() {
+    fs.readFile("random.txt", "utf8", function(error, data) {
 
-//         titleFull = data.split(",").join();
+        if (error) {
+          return console.log(error);
+        }
 
+        else {
+
+            console.log(data)
       
-//       });
-// }
+        var pull = data.split(",")
+            liriRequest = pull[0];
+            titleFull = pull[1].split(`"`).join("");
+
+
+            console.log(pull)
+            console.log(liriRequest)
+            console.log(titleFull)
+
+            
+            
+            
+        }
+
+
+
+
+      });
+}
 
 
 
