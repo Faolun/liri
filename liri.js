@@ -29,11 +29,14 @@ switch (liriRequest) {
     case "do-what-it-says":
         doIt();
         break;
+    default:
+        console.log("Not a command, please refer to readme for commands.");
+        return;
 }
 
 function mytweets() {
 
-    var twitterURLQuery = "statuses/user_timeline"
+    var twitterURLQuery = "statuses/user_timeline";
 
     var params = { user_id: "1016817745827123205", count: 20 }
 
@@ -44,7 +47,7 @@ function mytweets() {
                 tweetData = `You tweeted "${tweets[i].text}" on ${tweets[i].created_at}\n`;
                 log(tweetData);
                 console.log(tweetData);
-            }
+            };
         };
         if (err) {
             console.log(err);
@@ -78,15 +81,15 @@ function spotifySong() {
             else if (err) {
                 console.log(err);
                 return;
-            }
+            };
 
-        })
-    }
+        });
+    };
     if (!titleFull) {
         console.log("No song selected, defaulting to The Sign by Ace of Base...")
         titleFull = "the sign ace of base"
         spotifySong();
-    }
+    };
 };
 
 function movie() {
@@ -117,15 +120,15 @@ function movie() {
             } else if (error) {
                 console.log(error);
                 console.log(response);
-            }
-        })
-    }
+            };
+        });
+    };
     if (!titleFull) {
         console.log("No movie title entered, defaulting to Mr. Nobody... apparently, it is on Netflix.")
         titleFull = "Mr. Nobody";
         movie();
-    }
-}
+    };
+};
 
 function doIt() {
     log();
@@ -154,20 +157,20 @@ function doIt() {
                     break;
                 default:
                     return;
-            }
-        }
+            };
+        };
     });
-}
+};
 
-function log(content){
+function log(content) {
     var stamp = new Date();
     var str = `\n${spacer}\n/////////////////Date: ${stamp}| Request: ${liriRequest}/////////////////\n${content}`
 
-    fs.appendFile("log.txt", str, function(err) {
+    fs.appendFile("log.txt", str, function (err) {
         if (err) {
-          return console.log(err);
-        }
-      });
+            return console.log(err);
+        };
+    });
 }
 
 
