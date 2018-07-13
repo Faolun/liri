@@ -24,7 +24,7 @@ node commands:
 
     "node liri movie-this 'movie title'"
 
-        Displays movie data from OMDB for the song title entered.
+        Displays movie data from OMDB for the movie title entered.
             Data sets include:
                 Title
                 Year
