@@ -5,7 +5,7 @@ Has NPM requirements.
 
 "npm install" to install all required npm located in package.json.
 
-All returned data is logged to console amd log.txt with timestamp.
+All returned data is logged to console and log.txt with timestamp.
 
 node commands:
 
