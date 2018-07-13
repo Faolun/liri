@@ -4,7 +4,7 @@ var fs = require("fs");
 var request = require("request");
 var Twitter = require("twitter");
 var Spotify = require("node-spotify-api");
-var omdbApi = require('omdb-client');
+
 
 var spotify = new Spotify(keys.spotify);
 var client = new Twitter(keys.twitter);
@@ -41,7 +41,9 @@ function mytweets() {
 
         if (!err) {
             for (let i = 0; i < tweets.length; i++) {
-                console.log(`You tweeted "${tweets[i].text}" on ${tweets[i].created_at}\n`);
+                tweetData = `You tweeted "${tweets[i].text}" on ${tweets[i].created_at}\n`;
+                log(tweetData);
+                console.log(tweetData);
             }
         };
         if (err) {
@@ -69,6 +71,7 @@ function spotifySong() {
                         `Album: ${trackList.album.name}`
                     ].join("\n");
 
+                    log(songData);
                     console.log(songData);
                 }
             }
@@ -80,6 +83,7 @@ function spotifySong() {
         })
     }
     if (!titleFull) {
+        console.log("No song selected, defaulting to The Sign by Ace of Base...")
         titleFull = "the sign ace of base"
         spotifySong();
     }
@@ -91,27 +95,29 @@ function movie() {
         var movieURL = `https://www.omdbapi.com/?t=${titleFull}&y=&plot=short&apikey=${omdbKey}`
 
         request(movieURL, function (error, response, body) {
-            if(!error) {
+            if (!error) {
                 var data = JSON.parse(body)
                 var movieData = [
-                spacer,
-                data.Title,
-                spacer,
-                `Year: ${data.Year}`,
-                `IMDB Rating: ${data.Ratings[0].Value}`,
-                `Rotten Tomato Score: ${data.Ratings[1].Value}`,
-                `Country: ${data.Country}`,
-                `Language(s): ${data.Language}`,
-                spacer,
-                `Short Plot: ${data.Plot}`,
-                `Starring: ${data.Actors}`
-            ].join("\n")
+                    spacer,
+                    data.Title,
+                    spacer,
+                    `Year: ${data.Year}`,
+                    `IMDB Rating: ${data.Ratings[0].Value}`,
+                    `Rotten Tomato Score: ${data.Ratings[1].Value}`,
+                    `Country: ${data.Country}`,
+                    `Language(s): ${data.Language}`,
+                    spacer,
+                    `Short Plot: ${data.Plot}`,
+                    `Starring: ${data.Actors}`
+                ].join("\n")
 
-            console.log(movieData);
-        } else if(error) {
-        console.log(error);
-        console.log(response);
-        }
+                log(movieData);
+                console.log(movieData);
+
+            } else if (error) {
+                console.log(error);
+                console.log(response);
+            }
         })
     }
     if (!titleFull) {
@@ -121,35 +127,46 @@ function movie() {
     }
 }
 
-
 function doIt() {
-    fs.readFile("random.txt", "utf8", function(error, data) {
+    log();
+    fs.readFile("random.txt", "utf8", function (error, data) {
 
         if (error) {
-          return console.log(error);
+            return console.log(error);
         }
-
         else {
 
-            console.log(data)
-      
-        var pull = data.split(",")
+            var pull = data.split(",")
             liriRequest = pull[0];
             titleFull = pull[1].split(`"`).join("");
 
+            // i really tried to get the original switch to be run with recursion, but I don't have any more time to devote to it and just created another one.
 
-            console.log(pull)
-            console.log(liriRequest)
-            console.log(titleFull)
-
-            
-            
-            
+            switch (liriRequest) {
+                case "my-tweets":
+                    mytweets();
+                    break;
+                case "spotify-this-song":
+                    spotifySong();
+                    break;
+                case "movie-this":
+                    movie();
+                    break;
+                default:
+                    return;
+            }
         }
+    });
+}
 
+function log(content){
+    var stamp = new Date();
+    var str = `\n${spacer}\n/////////////////Date: ${stamp}| Request: ${liriRequest}/////////////////\n${content}`
 
-
-
+    fs.appendFile("log.txt", str, function(err) {
+        if (err) {
+          return console.log(err);
+        }
       });
 }
 
