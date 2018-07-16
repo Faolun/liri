@@ -16,6 +16,8 @@ var spacer = `-------------------------------------------------------`
 var liriRequest = process.argv[2];
 var titleFull = process.argv.slice(3).join(" ");
 
+function switcher() {
+
 switch (liriRequest) {
     case "my-tweets":
         mytweets();
@@ -32,6 +34,7 @@ switch (liriRequest) {
     default:
         console.log("Not a command, please refer to readme for commands.");
         return;
+}
 }
 
 function mytweets() {
@@ -143,21 +146,8 @@ function doIt() {
             liriRequest = pull[0];
             titleFull = pull[1].split(`"`).join("");
 
-            // i really tried to get the original switch to be run with recursion, but I don't have any more time to devote to it and just created another one.
 
-            switch (liriRequest) {
-                case "my-tweets":
-                    mytweets();
-                    break;
-                case "spotify-this-song":
-                    spotifySong();
-                    break;
-                case "movie-this":
-                    movie();
-                    break;
-                default:
-                    return;
-            };
+        switcher();
         };
     });
 };
@@ -173,6 +163,7 @@ function log(content) {
     });
 }
 
+switcher();
 
 
 
