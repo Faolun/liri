@@ -5,7 +5,7 @@ Has NPM requirements.
 
 "npm install" to install all required npm located in package.json.
 
-All returned data is logged to console amd log.txt with timestamp.
+All returned data is logged to console and log.txt with timestamp.
 
 node commands:
 
@@ -24,7 +24,7 @@ node commands:
 
     "node liri movie-this 'movie title'"
 
-        Displays movie data from OMDB for the song title entered.
+        Displays movie data from OMDB for the movie title entered.
             Data sets include:
                 Title
                 Year
